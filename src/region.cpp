@@ -35,7 +35,7 @@ void initializeRegions(
     std::vector<Region>& regions, 
     const double initial_pheromone, 
     const double dimensions,
-    std::function<double(std::vector<double>&)> objectiveFunction
+    std::function<double(std::vector<double>&)>& objectiveFunction
 ) {
     std::uniform_real_distribution<> coord_dis(LOWER_BOUND, UPPER_BOUND);
     for (int i = 0; i < NUM_REGIONS; ++i) {

@@ -42,7 +42,7 @@ void initializeRegions(
     std::vector<Region>& regions, 
     const double initial_pheromone, 
     const double dimensions,
-    std::function<double(std::vector<double>&)> objectiveFunction
+    std::function<double(std::vector<double>&)>& objectiveFunction
 );
 
 // Select region based on pheromone levels
