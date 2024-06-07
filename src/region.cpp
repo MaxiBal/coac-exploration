@@ -7,7 +7,19 @@
 namespace 
 {
 
-int roulette_wheel_selection(const std::vector<Region>& regions)
+double distance(const std::vector<double>& a, const std::vector<double>& b) {
+    double sum = 0.0;
+    for (int i = 0; i < a.size(); ++i) {
+        sum += std::pow(a[i] - b[i], 2);
+    }
+    return std::sqrt(sum);
+}
+
+int roulette_wheel_selection(
+    const std::vector<Region>& regions, 
+    const std::vector<double>& current_position,
+    const std::vector<std::vector<int>>& grid
+)
 {
     std::vector<double> probabilities;
 
@@ -16,6 +28,19 @@ int roulette_wheel_selection(const std::vector<Region>& regions)
     }
 
     std::discrete_distribution<> dist(probabilities.begin(), probabilities.end());
+
+    int selected_region_index;
+    do {
+        selected_region_index = dist(RandomGenerator::gen);
+    } while (
+        is_in_obstacle(regions[selected_region_index].center.coordinates, grid) || 
+        distance(
+            regions[selected_region_index].center.coordinates, 
+            current_position
+        ) > 2.0);
+
+    return selected_region_index;
+
     return dist(RandomGenerator::gen);
 }
 
@@ -27,6 +52,7 @@ int max_pheromone(const std::vector<Region>& regions)
     );
 }
 
+
 } // namespace 
 
 
@@ -35,16 +61,29 @@ void initializeRegions(
     std::vector<Region>& regions, 
     const double initial_pheromone, 
     const double dimensions,
-    std::function<double(std::vector<double>&)>& objectiveFunction
-) {
+    std::function<double(std::vector<double>&)>& objectiveFunction,
+    const std::vector<std::vector<int>>& grid
+) 
+{
     std::uniform_real_distribution<> coord_dis(LOWER_BOUND, UPPER_BOUND);
+    
     for (int i = 0; i < NUM_REGIONS; ++i) {
+
         Region region;
         region.center.coordinates.resize(dimensions);
-        for (int d = 0; d < dimensions; ++d) {
-            region.center.coordinates[d] = coord_dis(RandomGenerator::gen);
+
+        bool valid = false;
+        while (!valid) {
+            for (int d = 0; d < DIMENSIONS; ++d) {
+                region.center.coordinates[d] = coord_dis(RandomGenerator::gen);
+            }
+            valid = !is_in_obstacle(region.center.coordinates, grid);
+        }
+
+        for (int d = 0; d < DIMENSIONS; ++d) {
             region.radius.push_back((UPPER_BOUND - LOWER_BOUND) / 2);
         }
+
         region.center.value = objectiveFunction(region.center.coordinates);
         region.pheromone = initial_pheromone;
         region.visits = 0;
@@ -52,19 +91,23 @@ void initializeRegions(
     }
 }
 
-int selectRegion(const std::vector<Region>& regions)
+int selectRegion(
+    const std::vector<Region>& regions, 
+    const std::vector<double>& curr_pos, 
+    const std::vector<std::vector<int>>& grid
+)
 {
     // if random pull is less than q0, do max_pheromone
     // else, do RWS
 
-    double q = dis(RandomGenerator::gen);
+    // double q = dis(RandomGenerator::gen);
 
-    if (q <= q0)
-    {
-        return max_pheromone(regions);
-    }
-    else
-    {
-        return roulette_wheel_selection(regions);
-    }
+    // if (q <= q0)
+    // {
+    //     return max_pheromone(regions);
+    // }
+    // else
+    // {
+    return roulette_wheel_selection(regions, curr_pos, grid);
+    // }
 }

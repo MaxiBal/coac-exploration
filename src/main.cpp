@@ -10,6 +10,14 @@
 // Parameters
 
 
+std::vector<std::vector<int>> grid = {
+    {0, 0, 0, 1, 0},
+    {0, 1, 0, 1, 0},
+    {0, 0, 0, 0, 0},
+    {1, 1, 0, 1, 0},
+    {0, 0, 0, 0, 0}
+};
+
 
 
 // Objective function to be minimized (Rosenbrock function example)
@@ -24,29 +32,36 @@
 
 inline double objectiveFunction(const std::vector<double>& coordinates)
 {
-    // distance to point (100, 100, ...)
-    // avoid circle with radius 5, centered around (0, 0)
+    // distance to point (5, 5, ...)
 
     double dist = 0.0;
-    bool exists_in_collision = false;
+
     for (auto d : coordinates)
     {
-        dist += pow(100 - d, 2);
-        if (d > -5 && d < 5)
-        {
-            exists_in_collision = true;
-        }
-
-        if (d > 80 && d < 85)
-        {
-            exists_in_collision = true;
-        }
+        dist += pow(4.65 - d, 2);
     }
 
-    return sqrtl(dist) + (exists_in_collision ? 100000 : 0);
+    return sqrtl(dist);
 }
 
-
+std::vector<Point> generateInitialPositions() {
+    std::vector<Point> initial_positions;
+    std::uniform_real_distribution<> coord_dis(LOWER_BOUND, UPPER_BOUND);
+    for (int i = 0; i < NUM_ANTS; ++i) {
+        Point point;
+        point.coordinates.resize(DIMENSIONS);
+        bool valid = false;
+        while (!valid) {
+            for (int d = 0; d < DIMENSIONS; ++d) {
+                point.coordinates[d] = coord_dis(RandomGenerator::gen);
+            }
+            valid = !is_in_obstacle(point.coordinates, grid);
+        }
+        point.value = objectiveFunction(point.coordinates);
+        initial_positions.push_back(point);
+    }
+    return initial_positions;
+}
 
 
 
@@ -77,12 +92,30 @@ void print_coac_results(const COAC_Result& result)
     }
 
     std::cout << std::endl;
+
+    // std::cout << "-------------\n";
+    // std::cout << "region data:\n";
+    // for (const auto region : result.regions)
+    // {
+    //     std::cout << "(";
+    //     for (int i = 0; i < region.center.coordinates.size(); i++)
+    //     {
+    //         std::cout << region.center.coordinates[i] << ", "
+    //     }
+    // }
 }
 
 
 
 int main() {
-    auto result = coac(objectiveFunction);
+
+    auto initial_positions = generateInitialPositions();
+    
+    auto result = coac(
+        objectiveFunction,
+        grid,
+        initial_positions
+    );
     print_coac_results(result);
     
     return 0;

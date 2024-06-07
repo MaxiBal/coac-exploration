@@ -9,8 +9,8 @@
 // factor that determines how often the max pheromone path is taken versus the roulette wheel selection
 const double q0 = 0.5;
 
-const double LOWER_BOUND = -500.0; // Lower bound for search space
-const double UPPER_BOUND = 500.0; // Upper bound for search space
+const double LOWER_BOUND = 0.0; // Lower bound for search space
+const double UPPER_BOUND = 5.0; // Upper bound for search space
 const int NUM_REGIONS = 30; // Number of regions
 
 // Structure to represent a point in the search space
@@ -42,11 +42,16 @@ void initializeRegions(
     std::vector<Region>& regions, 
     const double initial_pheromone, 
     const double dimensions,
-    std::function<double(std::vector<double>&)>& objectiveFunction
+    std::function<double(std::vector<double>&)>& objectiveFunction,
+    const std::vector<std::vector<int>>& grid
 );
 
 // Select region based on pheromone levels
-int selectRegion(const std::vector<Region>& regions);
+int selectRegion(
+    const std::vector<Region>& regions,
+    const std::vector<double>& curr_pos, 
+    const std::vector<std::vector<int>>& grid
+);
 
 
 
