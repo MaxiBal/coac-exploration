@@ -10,5 +10,9 @@ bool is_in_obstacle(
 {
     int x = static_cast<int>(std::floor(coordinates[0]));
     int y = static_cast<int>(std::floor(coordinates[1]));
-    return (x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] == 1);
+    return (
+        x >= 0 && x < grid.size() &&  // is in
+        y >= 0 && y < grid[0].size() && 
+        grid[x][y] == 1
+    );
 }

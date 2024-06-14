@@ -2,7 +2,6 @@
 
 #include <algorithm>
 
-
 const double OBSTACLE_PENALTY = 1e6; // Penalty for point existing in an obstacle
 
 namespace 
@@ -36,7 +35,7 @@ std::vector<Point> generateOrthogonalPoints(
             valid = !is_in_obstacle(point.coordinates, grid);
         }
         
-        point.value = objective_function(point.coordinates) + (is_in_obstacle(point.coordinates, grid) ? OBSTACLE_PENALTY : 0);
+        point.value = objective_function(point.coordinates);
         points.push_back(point);
     }
 
@@ -97,6 +96,8 @@ COAC_Result coac(
                 }
             );
 
+            // shrink / grow region radius depending on best_point_it value
+
             if (best_point_it->value < selected_region.center.value) 
             {
                 selected_region.center = *best_point_it;
@@ -113,6 +114,8 @@ COAC_Result coac(
                 }
             }
 
+            // update global best if selected region is better than global best
+
             if (selected_region.center.value < global_best_value) 
             {
                 global_best_value = selected_region.center.value;
@@ -120,6 +123,9 @@ COAC_Result coac(
             }
         }
 
+        // global modulation phase
+        // update each region's pheromone level
+        
         for (auto& region : regions) 
         {
             region.pheromone = (1 - PHEROMONE_EVAPORATION) * region.pheromone + ALPHA * region.visits;

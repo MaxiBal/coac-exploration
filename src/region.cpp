@@ -15,34 +15,6 @@ double distance(const std::vector<double>& a, const std::vector<double>& b) {
     return std::sqrt(sum);
 }
 
-int roulette_wheel_selection(
-    const std::vector<Region>& regions, 
-    const std::vector<double>& current_position,
-    const std::vector<std::vector<int>>& grid
-)
-{
-    std::vector<double> probabilities;
-
-    for (const auto& region : regions) {
-        probabilities.push_back(region.pheromone);
-    }
-
-    std::discrete_distribution<> dist(probabilities.begin(), probabilities.end());
-
-    int selected_region_index;
-    do {
-        selected_region_index = dist(RandomGenerator::gen);
-    } while (
-        is_in_obstacle(regions[selected_region_index].center.coordinates, grid) || 
-        distance(
-            regions[selected_region_index].center.coordinates, 
-            current_position
-        ) > 2.0);
-
-    return selected_region_index;
-
-    return dist(RandomGenerator::gen);
-}
 
 int max_pheromone(const std::vector<Region>& regions)
 {
@@ -91,23 +63,38 @@ void initializeRegions(
     }
 }
 
+namespace 
+{
+
+inline int roulette_wheel_selection(
+    const std::vector<Region>& regions, 
+    const std::vector<double>& current_position,
+    const std::vector<std::vector<int>>& grid
+)
+{
+    std::vector<double> probabilities;
+    const double distance_penalty = 1;
+
+    for (const auto& region : regions) {
+        probabilities.push_back(
+            region.pheromone * 
+            distance_penalty / distance(current_position, region.center.coordinates)
+        );
+    }
+
+    std::discrete_distribution<> dist(probabilities.begin(), probabilities.end());
+
+    return dist(RandomGenerator::gen);
+}
+
+} // namespace 
+
+
 int selectRegion(
     const std::vector<Region>& regions, 
     const std::vector<double>& curr_pos, 
     const std::vector<std::vector<int>>& grid
 )
 {
-    // if random pull is less than q0, do max_pheromone
-    // else, do RWS
-
-    // double q = dis(RandomGenerator::gen);
-
-    // if (q <= q0)
-    // {
-    //     return max_pheromone(regions);
-    // }
-    // else
-    // {
     return roulette_wheel_selection(regions, curr_pos, grid);
-    // }
 }

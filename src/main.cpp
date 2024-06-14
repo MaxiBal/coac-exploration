@@ -7,15 +7,17 @@
 
 #include <coac.hpp>
 
+#include <chrono>
+
 // Parameters
 
 
 std::vector<std::vector<int>> grid = {
-    {0, 0, 0, 1, 0},
-    {0, 1, 0, 1, 0},
+    {0, 0, 1, 0, 0},
     {0, 0, 0, 0, 0},
-    {1, 1, 0, 1, 0},
-    {0, 0, 0, 0, 0}
+    {1, 0, 0, 0, 1},
+    {0, 0, 0, 0, 0},
+    {0, 0, 1, 0, 0}
 };
 
 
@@ -28,9 +30,9 @@ std::vector<std::vector<int>> grid = {
 //         sum += 100 * std::pow(coordinates[i + 1] - std::pow(coordinates[i], 2), 2) + std::pow(coordinates[i] - 1, 2);
 //     }
 //     return sum;
-// }
+//}
 
-inline double objectiveFunction(const std::vector<double>& coordinates)
+double objectiveFunction(const std::vector<double>& coordinates)
 {
     // distance to point (5, 5, ...)
 
@@ -93,19 +95,42 @@ void print_coac_results(const COAC_Result& result)
 
     std::cout << std::endl;
 
-    // std::cout << "-------------\n";
-    // std::cout << "region data:\n";
-    // for (const auto region : result.regions)
-    // {
-    //     std::cout << "(";
-    //     for (int i = 0; i < region.center.coordinates.size(); i++)
-    //     {
-    //         std::cout << region.center.coordinates[i] << ", "
-    //     }
-    // }
+    std::cout << "-------------\n";
+    std::cout << "region data:\n[";
+    for (const auto region : result.regions)
+    {
+        std::cout << "(";
+        for (int i = 0; i < region.center.coordinates.size(); i++)
+        {
+            std::cout << region.center.coordinates[i] << ", ";
+        }
+        std::cout << "), ";
+    }
+    std::cout << "]\n";
 }
 
+void test_n_iters()
+{
+    // check runtime for `TEST_ITERS` coac algorithms
+    const int TEST_ITERS = 1000;
+    size_t total_runtime = 0;
 
+    size_t total_iters = 0;
+
+    for (int i = 0; i < TEST_ITERS; i++)
+    {
+        auto t1 = std::chrono::high_resolution_clock::now();
+        auto result = coac(objectiveFunction, grid, generateInitialPositions());
+        auto t2 = std::chrono::high_resolution_clock::now();
+
+        total_iters += result.iters;
+        total_runtime += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
+    }
+
+    std::cout << "For " << TEST_ITERS << " iterations:\n";
+    std::cout << "Average iterations: " << total_iters / TEST_ITERS << ".\n";
+    std::cout << "Average runtime: " << total_runtime / TEST_ITERS << ".\n";
+}
 
 int main() {
 
@@ -116,8 +141,9 @@ int main() {
         grid,
         initial_positions
     );
+
     print_coac_results(result);
-    
+
     return 0;
 }
 
