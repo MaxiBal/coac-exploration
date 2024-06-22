@@ -33,6 +33,12 @@ foreach(dir ${INCLUDES})
         message(STATUS ${dir})
 endforeach()
 
-
 add_executable(${PROJECT_N} ${SRCS})
 target_include_directories(${PROJECT_N} PUBLIC include)
+
+# add_executable(COAC test/coac.cpp)
+# target_link_libraries(COAC PUBLIC ${PROJECT_N}lib)
+# target_include_directories(COAC PUBLIC test/include)
+
+# add_executable(PSO test/PSO.cpp)
+# target_include_directories(PSO PUBLIC test/include)

@@ -4,15 +4,21 @@ std::random_device RandomGenerator::rd;
 std::mt19937 RandomGenerator::gen(RandomGenerator::rd());
 
 bool is_in_obstacle(
-    const std::vector<double>& coordinates, 
-    const std::vector<std::vector<int>>& grid
+    const std::vector<double>& coordinates
 )
 {
-    int x = static_cast<int>(std::floor(coordinates[0]));
-    int y = static_cast<int>(std::floor(coordinates[1]));
-    return (
-        x >= 0 && x < grid.size() &&  // is in
-        y >= 0 && y < grid[0].size() && 
-        grid[x][y] == 1
-    );
+//     for (int i = 0; i < coordinates.size(); i++)
+//     {
+//         if (coordinates[i] > -5 && coordinates[i] < 5) return true;
+//     }
+
+    return false;
+}
+
+double distance_sq(const std::vector<double>& a, const std::vector<double>& b) {
+    double sum = 0.0;
+    for (int i = 0; i < a.size(); ++i) {
+        sum += std::pow(a[i] - b[i], 2);
+    }
+    return sum;
 }

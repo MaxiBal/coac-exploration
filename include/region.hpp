@@ -4,64 +4,60 @@
 #include <functional>
 #include <vector>
 
+
 #include <core.hpp>
+#include <path.hpp>
 
-// factor that determines how often the max pheromone path is taken versus the roulette wheel selection
-const double q0 = 0.5;
+const int INITIAL_NUM_REGIONS = 300; // Number of regions
 
-const double LOWER_BOUND = 0.01; // Lower bound for search space
-const double UPPER_BOUND = 4.99; // Upper bound for search space
-const int NUM_REGIONS = 30; // Number of regions
+const unsigned int REGION_DENSITY = static_cast<unsigned int>(VISIBILITY_RADIUS / VISIBILITY_RADIUS);
+const double INITIAL_RADIUS_VALUE = 8.0;
 
-// Structure to represent a point in the search space
-struct Point {
-    std::vector<double> coordinates;
-    double value;
-};
 
-// Structure to represent a region in the search space
-struct Region {
-    Point center;
-    std::vector<double> radius;
-    double pheromone;
-    int visits;
-};
 
 namespace
 {
 
-std::uniform_real_distribution<> dis(0.0, 1.0);
-
 int roulette_wheel_selection(
-    const std::vector<Region>& regions,
-    const std::vector<double>& current_position,
-    const std::vector<std::vector<int>>& grid
+    const std::vector<Region>& regions
 );
 
 
 int max_pheromone(const std::vector<Region>& regions);
 
+Region create_random_region(
+    const std::vector<double>& random_center,
+    const double dimensions,
+    const double initial_pheromone,
+    const std::function<double(std::vector<double>&)>& objective_function,
+    std::uniform_real_distribution<>& coord_dis,
+    int DIMENSIONS
+);
+
 }
 
 // Initialize regions with random centers and radii
-void initializeRegions(
+void initialize_regions(
     std::vector<Region>& regions, 
     const double initial_pheromone, 
     const double dimensions,
-    std::function<double(std::vector<double>&)>& objectiveFunction,
-    const std::vector<std::vector<int>>& grid
+    const std::function<double(const std::vector<double>&)>& objective_function,
+    double PROJECTED_LOWER_BOUND, double PROJECTED_UPPER_BOUND
 );
 
 // Select region based on pheromone levels
 int selectRegion(
-    const std::vector<Region>& regions,
-    const std::vector<double>& curr_pos, 
-    const std::vector<std::vector<int>>& grid
+    Path& path,
+    const std::vector<Region>& regions
+    //const Path& best_path
 );
 
 void populate_space_with_regions(
-    std::vector<Region>& regions,
-    const std::vector<double>& discovered_space
+    std::vector<Region>& regions, 
+    std::vector<double>  position,
+    const double dimensions,
+    const double initial_pheromone,
+    const std::function<double(std::vector<double>&)>& objective_function
 );
 
 

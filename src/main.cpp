@@ -1,149 +1,76 @@
 #include <iostream>
-#include <vector>
-#include <cmath>
-#include <limits>
+
 #include <random>
-#include <algorithm>
+#include <vector>
+
 
 #include <coac.hpp>
-
-#include <chrono>
-
-// Parameters
+#include <path.hpp>
 
 
-std::vector<std::vector<int>> grid = {
-    {0, 0, 1, 0, 0},
-    {0, 0, 0, 0, 0},
-    {1, 0, 0, 0, 1},
-    {0, 0, 0, 0, 0},
-    {0, 0, 1, 0, 0}
-};
+std::random_device rd;
+std::mt19937 gen(rd());
 
 
-
-// Objective function to be minimized (Rosenbrock function example)
-// double objectiveFunction(const std::vector<double>& coordinates) {
-//     double sum = 0.0;
-
-//     for (int i = 0; i < coordinates.size() - 1; ++i) {
-//         sum += 100 * std::pow(coordinates[i + 1] - std::pow(coordinates[i], 2), 2) + std::pow(coordinates[i] - 1, 2);
-//     }
-//     return sum;
-//}
-
-double objectiveFunction(const std::vector<double>& coordinates)
+void print_path(const Path& vec)
 {
-    // distance to point (5, 5, ...)
-
-    double dist = 0.0;
-
-    for (auto d : coordinates)
-    {
-        dist += pow(4.65 - d, 2);
-    }
-
-    return sqrtl(dist);
-}
-
-std::vector<Point> generateInitialPositions() {
-    std::vector<Point> initial_positions;
-    std::uniform_real_distribution<> coord_dis(LOWER_BOUND, UPPER_BOUND);
-    for (int i = 0; i < NUM_ANTS; ++i) {
-        Point point;
-        point.coordinates.resize(DIMENSIONS);
-        bool valid = false;
-        while (!valid) {
-            for (int d = 0; d < DIMENSIONS; ++d) {
-                point.coordinates[d] = coord_dis(RandomGenerator::gen);
-            }
-            valid = !is_in_obstacle(point.coordinates, grid);
-        }
-        point.value = objectiveFunction(point.coordinates);
-        initial_positions.push_back(point);
-    }
-    return initial_positions;
-}
-
-
-
-void print_coac_results(const COAC_Result& result)
-{
-    std::cout << "--------------\n";
-    std::cout << "Iterations: " << result.iters << std::endl;
-    std::cout << "Global Best Value: " << result.global_best << std::endl;
-    std::cout << "Global Best Coordinates: ";
-    for (const auto& coord : result.best_coords) {
-        std::cout << coord << " ";
-    }
-
-    std::cout << "\nAnt Paths\n";
-    for (const auto& path : result.ant_paths)
-    {
-        std::cout << "[";
-        for (const auto region : path)
-        {
-            std::cout << "(";
-            for (int i = 0; i < DIMENSIONS; i++)
-            {
-                std::cout << region.center.coordinates[i] << ",";
-            }
-            std::cout << "), ";
-        }
-        std::cout << "],\n";
-    }
-
-    std::cout << std::endl;
-
-    std::cout << "-------------\n";
-    std::cout << "region data:\n[";
-    for (const auto region : result.regions)
+    for (const auto& points : vec.waypoints)
     {
         std::cout << "(";
-        for (int i = 0; i < region.center.coordinates.size(); i++)
+        for (const auto c : points.coordinates)
         {
-            std::cout << region.center.coordinates[i] << ", ";
+            std::cout << c << ", ";
         }
         std::cout << "), ";
     }
-    std::cout << "]\n";
+    std::cout << "\n";
 }
 
-void test_n_iters()
+void print_result(const COAC_Result& result)
 {
-    // check runtime for `TEST_ITERS` coac algorithms
-    const int TEST_ITERS = 1000;
-    size_t total_runtime = 0;
-
-    size_t total_iters = 0;
-
-    for (int i = 0; i < TEST_ITERS; i++)
-    {
-        auto t1 = std::chrono::high_resolution_clock::now();
-        auto result = coac(objectiveFunction, grid, generateInitialPositions());
-        auto t2 = std::chrono::high_resolution_clock::now();
-
-        total_iters += result.iters;
-        total_runtime += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
-    }
-
-    std::cout << "For " << TEST_ITERS << " iterations:\n";
-    std::cout << "Average iterations: " << total_iters / TEST_ITERS << ".\n";
-    std::cout << "Average runtime: " << total_runtime / TEST_ITERS << ".\n";
+    std::cout << "--------------\n";
+    std::cout << "Iterations: " << result.iters << std::endl;
+    std::cout << "Best path:" << std::endl;
+    print_path(result.best_path);
 }
 
-int main() {
+const int NUM_AGENTS = 1;
+const int DIMENSIONS = 2;
+const double PROJECTED_LOWER_BOUND = 0;
+const double PROJECTED_UPPER_BOUND = 50;
 
-    auto initial_positions = generateInitialPositions();
-    
+
+std::vector<std::vector<double>> generate_initial_positions()
+{
+    std::vector<std::vector<double>> initial_positions;
+    for (int i = 0; i < NUM_AGENTS; ++i) {
+        std::vector<double> point(DIMENSIONS);
+        bool valid = false;
+        while (!valid) {
+            for (int d = 0; d < DIMENSIONS; ++d) {
+                point[d] = 0;
+            }
+            valid = true;// !is_in_obstacle(point);
+        }
+        initial_positions.push_back(point);
+    }
+    return initial_positions;
+} 
+
+int main()
+{
     auto result = coac(
-        objectiveFunction,
-        grid,
-        initial_positions
-    );
+        generate_initial_positions(),
+        {45.0, 45.0},
+        PROJECTED_LOWER_BOUND,
+        PROJECTED_UPPER_BOUND,
+        NUM_AGENTS,
+        1000,
+        DIMENSIONS
+    ); 
 
-    print_coac_results(result);
+    print_result(result);
+
 
     return 0;
 }
-
