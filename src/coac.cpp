@@ -65,11 +65,14 @@ COAC_Result coac(
 
     std::vector<Point> current_positions(initial_positions.size());
     std::vector<Path> ant_paths(NUM_AGENTS);
+    Path& best_path = ant_paths[0];
     
 
     for (; iter < MAX_ITERS; ++iter) 
     {
-        //std::cout << "Iteration " << iter << "\n" << std::endl;
+        #ifdef DEBUG
+        std::cout << "Iteration " << iter << "\n" << std::endl;
+        #endif
         for (auto& region : regions) 
         {
             region.visits = 0;
@@ -82,12 +85,11 @@ COAC_Result coac(
             );
 
             Region& selected_region = regions[selected_region_index];
-            //std::cout << "region: (" << selected_region.center.coordinates[0] << ", " << selected_region.center.coordinates[1] << ");\n"; 
             
             ant_paths[ant].waypoints.push_back(selected_region.center);
-            // ant_paths[ant].path_length += sqrt(
-            //     distance_sq(current_positions[ant].coordinates, selected_region.center.coordinates)
-            // );
+            ant_paths[ant].path_length += sqrt(
+                distance_sq(current_positions[ant].coordinates, selected_region.center.coordinates)
+            );
             ant_paths[ant].fitness = path_fitness(ant_paths[ant], target);
 
             current_positions[ant] = selected_region.center;
@@ -133,7 +135,7 @@ COAC_Result coac(
             if (ant_paths[ant].fitness < global_best_value) 
             {
                 global_best_value = ant_paths[ant].fitness;
-                //best_path = ant_paths[ant];
+                best_path = ant_paths[ant];
             }
 
             // add another region in explored area

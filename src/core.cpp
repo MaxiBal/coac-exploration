@@ -7,10 +7,10 @@ bool is_in_obstacle(
     const std::vector<double>& coordinates
 )
 {
-//     for (int i = 0; i < coordinates.size(); i++)
-//     {
-//         if (coordinates[i] > -5 && coordinates[i] < 5) return true;
-//     }
+    for (int i = 0; i < coordinates.size(); i++)
+    {
+        if (coordinates[i] > -5 && coordinates[i] < 5) return true;
+    }
 
     return false;
 }

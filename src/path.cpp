@@ -2,7 +2,7 @@
 
 double path_fitness(const Path& path, const std::vector<double>& target)
 {
-    double score = 0.0;//path.path_length;
+    double score = path.path_length;
 
     // score should be evaluated on final point's distance to target
     for (int i = 0; i < target.size(); i++)
@@ -26,19 +26,18 @@ double point_cost(
 )
 {
     return 
-        //path.fitness + 
+        path.fitness + 
         sqrt(distance_sq(path.waypoints[path.waypoints.size() - 1].coordinates, target)) + 
         costmap(point.coordinates);
 }
 
 double costmap(const std::vector<double>& coordinates)
 {
+    // rosenbrock function
     double sum = 0.0;
 
     for (int i = 0; i < coordinates.size() - 1; ++i) {
         sum += 100 * std::pow(coordinates[i + 1] - std::pow(coordinates[i], 2), 2) + std::pow(coordinates[i] - 1, 2);
     }
     return sum;
-
-    // return 0.0;
 }

@@ -49,7 +49,6 @@ void initialize_regions(
 int selectRegion(
     Path& path,
     const std::vector<Region>& regions
-    //const Path& best_path
 );
 
 void populate_space_with_regions(

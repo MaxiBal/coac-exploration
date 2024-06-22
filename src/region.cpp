@@ -109,23 +109,8 @@ inline int roulette_wheel_selection(
 int selectRegion(
     Path& path,
     const std::vector<Region>& regions
-    //const Path& best_path
 )
 {
-    // double q0 = 0.1;
-    // std::uniform_real_distribution<> dist(0.0, 1.0);
-
-    // if (dist(RandomGenerator::gen) < q0)
-    // {
-    //     // deep copy path
-    //     path.waypoints.clear();
-    //     path.waypoints.resize(best_path.waypoints.size());
-
-    //     std::copy(best_path.waypoints.begin(), best_path.waypoints.end(), path.waypoints.begin());
-
-    //     path.fitness = best_path.fitness;
-    //     path.path_length = best_path.path_length;
-    // }
 
     return roulette_wheel_selection(regions);
 }
